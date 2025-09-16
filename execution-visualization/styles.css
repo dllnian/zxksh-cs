@@ -178,36 +178,42 @@ body::after {
 
 /* 统计数据样式 */
 .stats-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
     margin-bottom: 20px;
 }
 
 .stat-item {
-    flex: 1;
     text-align: center;
-    padding: 15px;
+    padding: 12px;
     background: rgba(71,147,255,0.05);
     border-radius: 8px;
     border: 1px solid rgba(71,147,255,0.1);
-    margin: 0 5px;
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(71,147,255,0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(71,147,255,0.2);
 }
 
 .stat-value {
-    font-size: 32px;
+    font-size: 28px;
     font-weight: bold;
     color: #4793ff;
     margin-bottom: 5px;
 }
 
 .stat-label {
-    font-size: 14px;
+    font-size: 13px;
     color: #8899bb;
     margin-bottom: 5px;
 }
 
 .stat-trend {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
 }
 
@@ -217,6 +223,11 @@ body::after {
 
 .stat-trend.down {
     color: #ff4444;
+}
+
+/* 不同类型案件的特殊样式 */
+.stat-item.pending-case .stat-value {
+    color: #ff9500;
 }
 
 /* 核心指标样式 */

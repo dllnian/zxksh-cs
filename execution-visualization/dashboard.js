@@ -71,95 +71,157 @@ function initCharts() {
                         { offset: 1, color: 'rgba(0,255,136,0.1)' }
                     ])
                 }
+            },
+            {
+                name: '未结',
+                type: 'line',
+                smooth: true,
+                symbol: 'circle',
+                symbolSize: 8,
+                data: [3200, 3350, 3180, 3420, 3280, 3390, 3520, 3450, 3487],
+                itemStyle: { color: '#ff9500' },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(255,149,0,0.4)' },
+                        { offset: 1, color: 'rgba(255,149,0,0.1)' }
+                    ])
+                }
             }
         ]
     };
     caseFlowChart.setOption(caseFlowOption);
 
-    // 2. 失信被执行人地图分布
+    // 2. 失信被执行人地图分布 - 使用清晰的条形图展示
     const dishonestMapChart = echarts.init(document.getElementById('dishonestMapChart'));
+    
+    // 省份数据（按数量降序排列）
+    const provinceData = [
+        {name: '广东', value: 1289, percent: 12.8},
+        {name: '江苏', value: 967, percent: 9.6},
+        {name: '北京', value: 856, percent: 8.5},
+        {name: '浙江', value: 834, percent: 8.3},
+        {name: '山东', value: 756, percent: 7.5},
+        {name: '上海', value: 723, percent: 7.2},
+        {name: '河南', value: 645, percent: 6.4},
+        {name: '四川', value: 589, percent: 5.8},
+        {name: '湖北', value: 523, percent: 5.2},
+        {name: '湖南', value: 467, percent: 4.6},
+        {name: '安徽', value: 423, percent: 4.2},
+        {name: '福建', value: 398, percent: 3.9},
+        {name: '重庆', value: 356, percent: 3.5},
+        {name: '陕西', value: 298, percent: 2.9},
+        {name: '辽宁', value: 267, percent: 2.6}
+    ];
+    
     const dishonestMapOption = {
+        backgroundColor: 'transparent',
         tooltip: {
-            trigger: 'item',
+            trigger: 'axis',
             backgroundColor: 'rgba(0,0,0,0.8)',
-            borderColor: '#4793ff'
-        },
-        visualMap: {
-            min: 0,
-            max: 1000,
-            left: 'left',
-            top: 'bottom',
-            text: ['高', '低'],
-            textStyle: { color: '#8899bb' },
-            calculable: true,
-            inRange: {
-                color: ['#2a5cff', '#4793ff', '#ff9500', '#ff4444']
+            borderColor: '#4793ff',
+            axisPointer: {
+                type: 'shadow'
+            },
+            formatter: function(params) {
+                const data = params[0];
+                return `${data.name}<br/>
+                        失信被执行人: <span style="color:#4793ff;font-weight:bold">${data.value}</span> 人<br/>
+                        占全国比例: <span style="color:#ff9500;font-weight:bold">${provinceData[data.dataIndex].percent}%</span>`;
             }
         },
-        series: [{
-            name: '失信被执行人数量',
-            type: 'scatter',
-            coordinateSystem: 'geo',
-            data: convertData([
-                {name: '北京市', value: 856},
-                {name: '上海市', value: 723},
-                {name: '广州市', value: 689},
-                {name: '深圳市', value: 612},
-                {name: '杭州市', value: 534},
-                {name: '南京市', value: 467},
-                {name: '武汉市', value: 423},
-                {name: '成都市', value: 389},
-                {name: '重庆市', value: 356},
-                {name: '西安市', value: 298}
-            ]),
-            symbolSize: function (val) {
-                return val[2] / 20;
+        grid: {
+            left: '15%',
+            right: '10%',
+            bottom: '5%',
+            top: '10%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'value',
+            axisLine: { lineStyle: { color: '#4793ff' } },
+            axisLabel: { 
+                color: '#8899bb',
+                formatter: '{value}人'
             },
-            encode: { value: 2 },
-            label: {
-                formatter: '{b}',
-                position: 'right',
-                show: true,
-                color: '#fff'
+            splitLine: { 
+                lineStyle: { 
+                    color: 'rgba(71,147,255,0.1)',
+                    type: 'dashed'
+                } 
             },
-            itemStyle: {
-                color: '#ff4444',
-                shadowBlur: 10,
-                shadowColor: 'rgba(255,68,68,0.5)'
+            max: 1400
+        },
+        yAxis: {
+            type: 'category',
+            data: provinceData.map(item => item.name).reverse(),
+            axisLine: { lineStyle: { color: '#4793ff' } },
+            axisLabel: { 
+                color: '#fff',
+                fontSize: 13,
+                fontWeight: 'bold'
+            },
+            axisTick: { show: false }
+        },
+        series: [
+            {
+                name: '失信被执行人数量',
+                type: 'bar',
+                data: provinceData.map(item => item.value).reverse(),
+                barWidth: '60%',
+                label: {
+                    show: true,
+                    position: 'right',
+                    color: '#fff',
+                    fontSize: 12,
+                    fontWeight: 'bold',
+                    formatter: '{c}'
+                },
+                itemStyle: {
+                    color: function(params) {
+                        const value = params.value;
+                        if (value > 800) {
+                            return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                { offset: 0, color: '#ff4444' },
+                                { offset: 1, color: '#ff6666' }
+                            ]);
+                        } else if (value > 500) {
+                            return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                { offset: 0, color: '#ff9500' },
+                                { offset: 1, color: '#ffb347' }
+                            ]);
+                        } else {
+                            return new echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                                { offset: 0, color: '#4793ff' },
+                                { offset: 1, color: '#66b3ff' }
+                            ]);
+                        }
+                    },
+                    borderRadius: [0, 4, 4, 0],
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(0,0,0,0.3)'
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 20,
+                        shadowColor: 'rgba(71,147,255,0.5)'
+                    }
+                }
+            },
+            // 背景条
+            {
+                type: 'bar',
+                data: provinceData.map(() => 1400).reverse(),
+                barWidth: '60%',
+                barGap: '-100%',
+                itemStyle: {
+                    color: 'rgba(71,147,255,0.05)',
+                    borderRadius: [0, 4, 4, 0]
+                },
+                silent: true,
+                z: 0
             }
-        }]
+        ]
     };
-    
-    // 模拟地图数据转换函数
-    function convertData(data) {
-        var res = [];
-        for (var i = 0; i < data.length; i++) {
-            var geoCoord = getGeoCoord(data[i].name);
-            if (geoCoord) {
-                res.push({
-                    name: data[i].name,
-                    value: geoCoord.concat(data[i].value)
-                });
-            }
-        }
-        return res;
-    }
-    
-    function getGeoCoord(city) {
-        const coords = {
-            '北京市': [116.405285, 39.904989],
-            '上海市': [121.472644, 31.231706],
-            '广州市': [113.280637, 23.125178],
-            '深圳市': [114.085947, 22.547],
-            '杭州市': [120.153576, 30.287459],
-            '南京市': [118.767413, 32.041544],
-            '武汉市': [114.298572, 30.584355],
-            '成都市': [104.065735, 30.659462],
-            '重庆市': [106.504962, 29.533155],
-            '西安市': [108.948024, 34.263161]
-        };
-        return coords[city];
-    }
     
     dishonestMapChart.setOption(dishonestMapOption);
 
