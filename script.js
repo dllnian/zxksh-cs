@@ -457,134 +457,365 @@ function initCharts() {
 
 // 初始化地图
 function initMap() {
-    // 使用中国地图的模拟数据
     const mapContainer = document.getElementById('mapContainer');
     
-    // 创建模拟的中国地图热力图
-    const mapChart = echarts.init(mapContainer);
+    // 获取现有的SVG背景
+    const existingSVG = mapContainer.querySelector('.map-background');
     
-    // 模拟各省份失信被执行人数据
-    const mapData = [
-        {name: '北京', value: 850},
-        {name: '天津', value: 620},
-        {name: '上海', value: 780},
-        {name: '重庆', value: 560},
-        {name: '河北', value: 1200},
-        {name: '河南', value: 1450},
-        {name: '云南', value: 380},
-        {name: '辽宁', value: 680},
-        {name: '黑龙江', value: 420},
-        {name: '湖南', value: 980},
-        {name: '安徽', value: 860},
-        {name: '山东', value: 1680},
-        {name: '新疆', value: 280},
-        {name: '江苏', value: 1420},
-        {name: '浙江', value: 1380},
-        {name: '江西', value: 650},
-        {name: '湖北', value: 820},
-        {name: '广西', value: 560},
-        {name: '甘肃', value: 320},
-        {name: '山西', value: 720},
-        {name: '内蒙古', value: 380},
-        {name: '陕西', value: 680},
-        {name: '吉林', value: 480},
-        {name: '福建', value: 750},
-        {name: '贵州', value: 420},
-        {name: '广东', value: 1850},
-        {name: '青海', value: 180},
-        {name: '西藏', value: 120},
-        {name: '四川', value: 1120},
-        {name: '宁夏', value: 280},
-        {name: '海南', value: 320},
-        {name: '台湾', value: 0},
-        {name: '香港', value: 0},
-        {name: '澳门', value: 0}
-    ];
-
-    // 创建虚拟地图配置
-    const mapOption = {
-        tooltip: {
-            trigger: 'item',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            borderColor: '#00BFFF',
-            borderWidth: 1,
-            formatter: '{b}<br/>失信人数: {c}人'
-        },
-        visualMap: {
-            min: 0,
-            max: 2000,
-            left: 'left',
-            top: 'bottom',
-            text: ['高', '低'],
-            textStyle: {
-                color: 'rgba(255, 255, 255, 0.8)'
-            },
-            calculable: true,
-            inRange: {
-                color: ['#87CEEB', '#00BFFF', '#1E90FF', '#0047AB']
-            }
-        },
-        series: [{
-            type: 'scatter',
-            coordinateSystem: 'geo',
-            symbolSize: function (val) {
-                return val[2] / 50;
-            },
-            itemStyle: {
-                color: '#00BFFF'
-            },
-            data: []
-        }],
-        geo: {
-            map: 'china',
-            roam: false,
-            itemStyle: {
-                areaColor: 'rgba(0, 47, 92, 0.8)',
-                borderColor: 'rgba(135, 206, 235, 0.5)'
-            },
-            emphasis: {
-                itemStyle: {
-                    areaColor: 'rgba(0, 191, 255, 0.3)'
-                }
-            }
-        }
-    };
-    
-    // 由于没有实际的地图数据，我们创建一个模拟的热力图效果
-    const heatmapHTML = `
-        <div style="width: 100%; height: 100%; position: relative; display: flex; align-items: center; justify-content: center;">
-            <div style="text-align: center; color: rgba(255, 255, 255, 0.8);">
-                <svg width="300" height="200" viewBox="0 0 300 200" style="filter: drop-shadow(0 0 20px rgba(0, 191, 255, 0.5));">
-                    <!-- 简化的中国地图轮廓 -->
-                    <path d="M 50 50 Q 100 30 150 35 Q 200 40 250 60 L 240 80 Q 220 100 200 120 L 180 130 Q 150 135 120 130 L 100 120 Q 80 100 60 80 Z" 
-                          fill="none" 
-                          stroke="#00BFFF" 
-                          stroke-width="2"
-                          opacity="0.8"/>
-                    
-                    <!-- 热点区域 -->
-                    <circle cx="180" cy="80" r="15" fill="rgba(255, 0, 0, 0.6)" opacity="0.8">
-                        <animate attributeName="r" values="15;20;15" dur="2s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="120" cy="90" r="12" fill="rgba(255, 170, 0, 0.6)" opacity="0.7">
-                        <animate attributeName="r" values="12;16;12" dur="2.5s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0.7;0.3;0.7" dur="2.5s" repeatCount="indefinite"/>
-                    </circle>
-                    <circle cx="150" cy="70" r="10" fill="rgba(0, 191, 255, 0.6)" opacity="0.6">
-                        <animate attributeName="r" values="10;14;10" dur="3s" repeatCount="indefinite"/>
-                        <animate attributeName="opacity" values="0.6;0.2;0.6" dur="3s" repeatCount="indefinite"/>
-                    </circle>
-                </svg>
-                <div style="margin-top: 20px; font-size: 16px;">失信被执行人地理分布图</div>
-                <div style="margin-top: 10px; font-size: 12px; color: rgba(255, 255, 255, 0.6);">
-                    基于全国法院执行案件数据分析
-                </div>
+    // 创建地图覆盖层
+    const mapOverlay = document.createElement('div');
+    mapOverlay.style.cssText = 'position: absolute; width: 100%; height: 100%; top: 0; left: 0; z-index: 2;';
+    mapOverlay.innerHTML = `
+        <!-- 背景网格 -->
+        <svg style="position: absolute; width: 100%; height: 100%; opacity: 0.1; z-index: 0;">
+            <defs>
+                <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                    <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#00BFFF" stroke-width="0.5"/>
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#grid)" />
+        </svg>
+        
+        <!-- 主地图容器 -->
+        <div id="chinaMapChart" style="width: 100%; height: 100%; position: relative; z-index: 1;"></div>
+        
+        <!-- 数据面板 -->
+        <div style="position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 8px; border: 1px solid rgba(0, 191, 255, 0.5); z-index: 3;">
+            <div style="font-size: 12px; color: #00BFFF; margin-bottom: 5px;">失信被执行人总数</div>
+            <div style="font-size: 20px; font-weight: bold; color: #ffffff;">23,456</div>
+        </div>
+        
+        <!-- 热点城市标记 -->
+        <div class="map-hotspots" style="z-index: 4;">
+            <div class="hotspot" style="position: absolute; top: 30%; left: 70%; animation: pulse 2s infinite;">
+                <div class="hotspot-inner" style="background: rgba(255, 0, 0, 0.8);"></div>
+                <div class="hotspot-label">北京<br><span style="font-size: 10px;">850人</span></div>
+            </div>
+            <div class="hotspot" style="position: absolute; top: 45%; left: 73%; animation: pulse 2.5s infinite;">
+                <div class="hotspot-inner" style="background: rgba(255, 0, 0, 0.8);"></div>
+                <div class="hotspot-label">上海<br><span style="font-size: 10px;">780人</span></div>
+            </div>
+            <div class="hotspot" style="position: absolute; top: 65%; left: 68%; animation: pulse 3s infinite;">
+                <div class="hotspot-inner" style="background: rgba(255, 0, 0, 0.9);"></div>
+                <div class="hotspot-label">广东<br><span style="font-size: 10px;">1850人</span></div>
+            </div>
+            <div class="hotspot" style="position: absolute; top: 35%; left: 65%; animation: pulse 2.2s infinite;">
+                <div class="hotspot-inner" style="background: rgba(255, 170, 0, 0.8);"></div>
+                <div class="hotspot-label">山东<br><span style="font-size: 10px;">1680人</span></div>
+            </div>
+            <div class="hotspot" style="position: absolute; top: 50%; left: 55%; animation: pulse 2.8s infinite;">
+                <div class="hotspot-inner" style="background: rgba(255, 170, 0, 0.7);"></div>
+                <div class="hotspot-label">四川<br><span style="font-size: 10px;">1120人</span></div>
+            </div>
+            <div class="hotspot" style="position: absolute; top: 38%; left: 58%; animation: pulse 2.4s infinite;">
+                <div class="hotspot-inner" style="background: rgba(255, 170, 0, 0.8);"></div>
+                <div class="hotspot-label">河南<br><span style="font-size: 10px;">1450人</span></div>
+            </div>
+            <div class="hotspot" style="position: absolute; top: 52%; left: 65%; animation: pulse 2.6s infinite;">
+                <div class="hotspot-inner" style="background: rgba(30, 144, 255, 0.8);"></div>
+                <div class="hotspot-label">江苏<br><span style="font-size: 10px;">1420人</span></div>
+            </div>
+            <div class="hotspot" style="position: absolute; top: 55%; left: 67%; animation: pulse 2.7s infinite;">
+                <div class="hotspot-inner" style="background: rgba(30, 144, 255, 0.8);"></div>
+                <div class="hotspot-label">浙江<br><span style="font-size: 10px;">1380人</span></div>
             </div>
         </div>
     `;
     
-    mapContainer.innerHTML = heatmapHTML;
+    mapContainer.appendChild(mapOverlay);
+    
+    // 添加热点样式
+    const style = document.createElement('style');
+    style.textContent = `
+        .map-hotspots {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .hotspot {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            transform: translate(-50%, -50%);
+        }
+        
+        .hotspot-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+        }
+        
+        .hotspot-label {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            color: #ffffff;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.8);
+            white-space: nowrap;
+        }
+        
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        
+        .hotspot::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: ripple 2s infinite;
+        }
+        
+        @keyframes ripple {
+            0% {
+                width: 20px;
+                height: 20px;
+                opacity: 1;
+            }
+            100% {
+                width: 60px;
+                height: 60px;
+                opacity: 0;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    
+    // 使用ECharts创建更详细的地图
+    const chinaMapChart = echarts.init(document.getElementById('chinaMapChart'));
+    
+    // 模拟各省份数据
+    const provinces = [
+        {name: '北京', value: 850, cp: [116.4, 39.9]},
+        {name: '天津', value: 620, cp: [117.2, 39.1]},
+        {name: '河北', value: 1200, cp: [114.5, 38.0]},
+        {name: '山西', value: 720, cp: [112.5, 37.9]},
+        {name: '内蒙古', value: 380, cp: [111.7, 40.8]},
+        {name: '辽宁', value: 680, cp: [123.4, 41.8]},
+        {name: '吉林', value: 480, cp: [125.3, 43.9]},
+        {name: '黑龙江', value: 420, cp: [126.6, 45.8]},
+        {name: '上海', value: 780, cp: [121.5, 31.2]},
+        {name: '江苏', value: 1420, cp: [118.8, 32.0]},
+        {name: '浙江', value: 1380, cp: [120.2, 30.3]},
+        {name: '安徽', value: 860, cp: [117.3, 31.9]},
+        {name: '福建', value: 750, cp: [119.3, 26.1]},
+        {name: '江西', value: 650, cp: [115.9, 28.7]},
+        {name: '山东', value: 1680, cp: [117.0, 36.7]},
+        {name: '河南', value: 1450, cp: [113.7, 34.8]},
+        {name: '湖北', value: 820, cp: [114.3, 30.6]},
+        {name: '湖南', value: 980, cp: [113.0, 28.2]},
+        {name: '广东', value: 1850, cp: [113.3, 23.1]},
+        {name: '广西', value: 560, cp: [108.3, 22.8]},
+        {name: '海南', value: 320, cp: [110.3, 20.0]},
+        {name: '重庆', value: 560, cp: [106.6, 29.6]},
+        {name: '四川', value: 1120, cp: [104.1, 30.7]},
+        {name: '贵州', value: 420, cp: [106.7, 26.6]},
+        {name: '云南', value: 380, cp: [102.7, 25.0]},
+        {name: '西藏', value: 120, cp: [91.1, 29.7]},
+        {name: '陕西', value: 680, cp: [108.9, 34.3]},
+        {name: '甘肃', value: 320, cp: [103.8, 36.1]},
+        {name: '青海', value: 180, cp: [101.8, 36.6]},
+        {name: '宁夏', value: 280, cp: [106.3, 38.5]},
+        {name: '新疆', value: 280, cp: [87.6, 43.8]}
+    ];
+    
+    // 创建模拟的地图轮廓数据
+    const mapOption = {
+        backgroundColor: 'transparent',
+        tooltip: {
+            trigger: 'item',
+            formatter: function(params) {
+                return params.name + '<br/>失信被执行人: ' + (params.value || 0) + '人';
+            },
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            borderColor: '#00BFFF',
+            borderWidth: 1,
+            textStyle: {
+                color: '#ffffff'
+            }
+        },
+        visualMap: {
+            show: false,
+            min: 0,
+            max: 2000,
+            inRange: {
+                color: ['rgba(135, 206, 235, 0.3)', 'rgba(0, 191, 255, 0.5)', 'rgba(30, 144, 255, 0.7)', 'rgba(0, 71, 171, 0.9)']
+            }
+        },
+        series: [
+            {
+                name: '失信被执行人分布',
+                type: 'scatter',
+                coordinateSystem: 'geo',
+                data: provinces.map(item => {
+                    return {
+                        name: item.name,
+                        value: item.cp.concat(item.value),
+                        symbolSize: Math.sqrt(item.value) * 2,
+                        itemStyle: {
+                            color: item.value > 1000 ? 'rgba(255, 0, 0, 0.8)' : 
+                                   item.value > 500 ? 'rgba(255, 170, 0, 0.8)' : 
+                                   'rgba(0, 191, 255, 0.8)'
+                        }
+                    };
+                }),
+                label: {
+                    show: false
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        formatter: '{b}',
+                        position: 'top',
+                        color: '#ffffff'
+                    }
+                }
+            }
+        ],
+        geo: {
+            map: 'china',
+            roam: false,
+            zoom: 1.2,
+            center: [105, 36],
+            itemStyle: {
+                areaColor: 'rgba(0, 47, 92, 0.6)',
+                borderColor: 'rgba(135, 206, 235, 0.8)',
+                borderWidth: 1,
+                shadowColor: 'rgba(0, 191, 255, 0.5)',
+                shadowBlur: 10
+            },
+            emphasis: {
+                itemStyle: {
+                    areaColor: 'rgba(0, 191, 255, 0.3)',
+                    borderColor: '#00BFFF',
+                    borderWidth: 2
+                }
+            },
+            regions: provinces.map(item => ({
+                name: item.name,
+                itemStyle: {
+                    areaColor: item.value > 1000 ? 'rgba(0, 71, 171, 0.8)' : 
+                               item.value > 500 ? 'rgba(30, 144, 255, 0.6)' : 
+                               'rgba(135, 206, 235, 0.4)'
+                }
+            }))
+        }
+    };
+    
+    // 由于ECharts需要加载地图数据，这里我们使用模拟的散点图
+    const scatterOption = {
+        backgroundColor: 'transparent',
+        grid: {
+            left: '5%',
+            right: '5%',
+            bottom: '5%',
+            top: '5%'
+        },
+        xAxis: {
+            type: 'value',
+            min: 70,
+            max: 140,
+            show: false
+        },
+        yAxis: {
+            type: 'value',
+            min: 15,
+            max: 55,
+            show: false
+        },
+        series: [{
+            type: 'scatter',
+            data: provinces.map(item => ({
+                value: item.cp,
+                name: item.name,
+                symbolSize: Math.sqrt(item.value) * 2,
+                itemStyle: {
+                    color: item.value > 1000 ? 'rgba(255, 0, 0, 0.8)' : 
+                           item.value > 500 ? 'rgba(255, 170, 0, 0.8)' : 
+                           'rgba(0, 191, 255, 0.8)',
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(0, 191, 255, 0.5)'
+                },
+                label: {
+                    show: item.value > 1000,
+                    formatter: '{b}',
+                    position: 'top',
+                    color: '#ffffff',
+                    fontSize: 10
+                }
+            })),
+            emphasis: {
+                scale: 1.5,
+                itemStyle: {
+                    shadowBlur: 20,
+                    shadowColor: 'rgba(0, 191, 255, 0.8)'
+                }
+            }
+        }]
+    };
+    
+    chinaMapChart.setOption(scatterOption);
+    
+    // 添加连线效果
+    setTimeout(() => {
+        const connectionData = [
+            [[116.4, 39.9], [121.5, 31.2]], // 北京到上海
+            [[116.4, 39.9], [113.3, 23.1]], // 北京到广东
+            [[121.5, 31.2], [113.3, 23.1]], // 上海到广东
+            [[104.1, 30.7], [113.3, 23.1]], // 四川到广东
+            [[117.0, 36.7], [116.4, 39.9]]  // 山东到北京
+        ];
+        
+        const linesSeries = {
+            type: 'lines',
+            data: connectionData.map(item => ({
+                coords: item,
+                lineStyle: {
+                    color: 'rgba(0, 191, 255, 0.3)',
+                    width: 1,
+                    curveness: 0.2
+                }
+            })),
+            effect: {
+                show: true,
+                period: 4,
+                trailLength: 0.2,
+                symbol: 'circle',
+                symbolSize: 4,
+                color: '#00BFFF'
+            }
+        };
+        
+        chinaMapChart.setOption({
+            series: [...chinaMapChart.getOption().series, linesSeries]
+        });
+    }, 1000);
+    
+    // 响应式调整
+    window.addEventListener('resize', () => {
+        chinaMapChart.resize();
+    });
 }
 
 // 初始化动画效果
