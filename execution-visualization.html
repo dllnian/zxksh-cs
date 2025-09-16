@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080">
+    <title>执行可视化</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 顶部标题栏 -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <div class="logo"></div>
+                <h1 class="main-title">执行可视化</h1>
+            </div>
+            <div class="header-center">
+                <div class="date-time" id="dateTime"></div>
+            </div>
+            <div class="header-right">
+                <div class="status-indicators">
+                    <div class="indicator online">
+                        <span class="dot"></span>
+                        <span>系统正常</span>
+                    </div>
+                    <div class="data-update">
+                        <span>数据更新时间：</span>
+                        <span id="updateTime">2025-09-16 10:30:00</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="dashboard-main">
+            <!-- 左侧面板 -->
+            <section class="left-panel">
+                <!-- 案件收结存情况 -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">案件收结存情况</h3>
+                        <span class="panel-subtitle">Case Status Overview</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="stats-grid">
+                            <div class="stat-item new-cases">
+                                <div class="stat-icon">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">新收案件</div>
+                                    <div class="stat-value" data-count="12458">12,458</div>
+                                    <div class="stat-trend up">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M7 14l5-5 5 5z"/>
+                                        </svg>
+                                        <span>+12.5%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-item old-cases">
+                                <div class="stat-icon">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">旧存案件</div>
+                                    <div class="stat-value" data-count="8965">8,965</div>
+                                    <div class="stat-trend down">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M7 10l5 5 5-5z"/>
+                                        </svg>
+                                        <span>-8.3%</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="stat-item closed-cases">
+                                <div class="stat-icon">
+                                    <svg viewBox="0 0 24 24" fill="currentColor">
+                                        <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/>
+                                    </svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-label">已结案件</div>
+                                    <div class="stat-value" data-count="15632">15,632</div>
+                                    <div class="stat-trend up">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M7 14l5-5 5 5z"/>
+                                        </svg>
+                                        <span>+18.7%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="caseFlowChart"></div>
+                    </div>
+                </div>
+
+                <!-- 执行标的到位率 -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">执行标的到位率</h3>
+                        <span class="panel-subtitle">Target Achievement Rate</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="progress-ring-container">
+                            <div class="progress-ring" id="achievementRate">
+                                <svg class="progress-ring-svg" viewBox="0 0 200 200">
+                                    <circle class="progress-ring-bg" cx="100" cy="100" r="90"></circle>
+                                    <circle class="progress-ring-progress" cx="100" cy="100" r="90"></circle>
+                                </svg>
+                                <div class="progress-ring-content">
+                                    <div class="progress-value">73.8%</div>
+                                    <div class="progress-label">到位率</div>
+                                </div>
+                            </div>
+                            <div class="progress-details">
+                                <div class="detail-item">
+                                    <span class="detail-label">执行标的总额</span>
+                                    <span class="detail-value">￥125.6亿</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-label">实际到位金额</span>
+                                    <span class="detail-value">￥92.7亿</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="monthlyAchievementChart"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 中间面板 -->
+            <section class="center-panel">
+                <!-- 失信被执行人分布地图 -->
+                <div class="panel-card map-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">失信被执行人分布</h3>
+                        <span class="panel-subtitle">Distribution of Dishonest Persons</span>
+                    </div>
+                    <div class="panel-body">
+                        <div id="mapContainer" class="map-container"></div>
+                        <div class="map-legend">
+                            <div class="legend-title">失信人数</div>
+                            <div class="legend-items">
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background: #0047AB"></span>
+                                    <span>0-100</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background: #1E90FF"></span>
+                                    <span>100-500</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background: #00BFFF"></span>
+                                    <span>500-1000</span>
+                                </div>
+                                <div class="legend-item">
+                                    <span class="legend-color" style="background: #87CEEB"></span>
+                                    <span>1000+</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 执行工作态势 -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">执行工作态势</h3>
+                        <span class="panel-subtitle">Execution Work Trends</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="trend-tabs">
+                            <button class="tab-btn active" data-period="day">日趋势</button>
+                            <button class="tab-btn" data-period="week">周趋势</button>
+                            <button class="tab-btn" data-period="month">月趋势</button>
+                        </div>
+                        <div class="chart-container" id="executionTrendChart"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧面板 -->
+            <section class="right-panel">
+                <!-- 案款情况 -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">案款情况</h3>
+                        <span class="panel-subtitle">Case Fund Status</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="fund-summary">
+                            <div class="fund-item deposit">
+                                <div class="fund-header">
+                                    <span class="fund-label">提存案款</span>
+                                    <span class="fund-icon">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="fund-value">￥8.5亿</div>
+                                <div class="fund-count">1,258笔</div>
+                            </div>
+                            <div class="fund-item unpaid">
+                                <div class="fund-header">
+                                    <span class="fund-label">未发还案款</span>
+                                    <span class="fund-icon">
+                                        <svg viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                                        </svg>
+                                    </span>
+                                </div>
+                                <div class="fund-value">￥3.2亿</div>
+                                <div class="fund-count">865笔</div>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="fundDistributionChart"></div>
+                    </div>
+                </div>
+
+                <!-- 执行质效指标达标情况 -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">执行质效指标达标情况</h3>
+                        <span class="panel-subtitle">Quality Indicators Achievement</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="indicators-list">
+                            <div class="indicator-item">
+                                <div class="indicator-header">
+                                    <span class="indicator-name">法定期限内结案率</span>
+                                    <span class="indicator-value">92.3%</span>
+                                </div>
+                                <div class="indicator-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 92.3%"></div>
+                                    </div>
+                                    <span class="indicator-status excellent">优秀</span>
+                                </div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-header">
+                                    <span class="indicator-name">执行案件平均用时</span>
+                                    <span class="indicator-value">68天</span>
+                                </div>
+                                <div class="indicator-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 85%"></div>
+                                    </div>
+                                    <span class="indicator-status good">良好</span>
+                                </div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-header">
+                                    <span class="indicator-name">实际执行率</span>
+                                    <span class="indicator-value">78.5%</span>
+                                </div>
+                                <div class="indicator-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 78.5%"></div>
+                                    </div>
+                                    <span class="indicator-status good">良好</span>
+                                </div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-header">
+                                    <span class="indicator-name">执行异议率</span>
+                                    <span class="indicator-value">3.2%</span>
+                                </div>
+                                <div class="indicator-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill warning" style="width: 32%"></div>
+                                    </div>
+                                    <span class="indicator-status warning">合格</span>
+                                </div>
+                            </div>
+                            <div class="indicator-item">
+                                <div class="indicator-header">
+                                    <span class="indicator-name">信访投诉率</span>
+                                    <span class="indicator-value">1.5%</span>
+                                </div>
+                                <div class="indicator-progress">
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: 15%"></div>
+                                    </div>
+                                    <span class="indicator-status excellent">优秀</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-container" id="qualityRadarChart"></div>
+                    </div>
+                </div>
+
+                <!-- 执行难点定位 -->
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <h3 class="panel-title">执行难点定位</h3>
+                        <span class="panel-subtitle">Execution Difficulties</span>
+                    </div>
+                    <div class="panel-body">
+                        <div class="difficulties-list">
+                            <div class="difficulty-item high">
+                                <div class="difficulty-icon">!</div>
+                                <div class="difficulty-content">
+                                    <div class="difficulty-title">财产查控难</div>
+                                    <div class="difficulty-desc">涉及案件：2,156件</div>
+                                </div>
+                                <div class="difficulty-percentage">35%</div>
+                            </div>
+                            <div class="difficulty-item medium">
+                                <div class="difficulty-icon">!</div>
+                                <div class="difficulty-content">
+                                    <div class="difficulty-title">被执行人下落不明</div>
+                                    <div class="difficulty-desc">涉及案件：1,823件</div>
+                                </div>
+                                <div class="difficulty-percentage">28%</div>
+                            </div>
+                            <div class="difficulty-item medium">
+                                <div class="difficulty-icon">!</div>
+                                <div class="difficulty-content">
+                                    <div class="difficulty-title">财产处置变现难</div>
+                                    <div class="difficulty-desc">涉及案件：1,456件</div>
+                                </div>
+                                <div class="difficulty-percentage">22%</div>
+                            </div>
+                            <div class="difficulty-item low">
+                                <div class="difficulty-icon">!</div>
+                                <div class="difficulty-content">
+                                    <div class="difficulty-title">其他原因</div>
+                                    <div class="difficulty-desc">涉及案件：965件</div>
+                                </div>
+                                <div class="difficulty-percentage">15%</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
