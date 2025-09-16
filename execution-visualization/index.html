@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=1920, height=1080, initial-scale=1.0">
+    <title>执行可视化</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- 顶部标题栏 -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <div class="system-logo"></div>
+                <span class="update-time">数据更新时间: <span id="updateTime">2025-09-16 10:30:00</span></span>
+            </div>
+            <h1 class="dashboard-title">执行可视化</h1>
+            <div class="header-right">
+                <div class="date-info">
+                    <span id="currentDate">2025年9月16日</span>
+                    <span id="currentTime">10:30:45</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主要内容区域 -->
+        <main class="dashboard-main">
+            <!-- 左侧面板 -->
+            <section class="left-panel">
+                <!-- 案件收结存分析 -->
+                <div class="card case-analysis">
+                    <h3 class="card-title">
+                        <span class="title-icon"></span>
+                        案件收结存分析
+                    </h3>
+                    <div class="card-content">
+                        <div class="stats-row">
+                            <div class="stat-item new-case">
+                                <div class="stat-value">2,358</div>
+                                <div class="stat-label">本月新收</div>
+                                <div class="stat-trend up">+12.3%</div>
+                            </div>
+                            <div class="stat-item old-case">
+                                <div class="stat-value">15,672</div>
+                                <div class="stat-label">旧存案件</div>
+                                <div class="stat-trend down">-5.6%</div>
+                            </div>
+                            <div class="stat-item closed-case">
+                                <div class="stat-value">2,156</div>
+                                <div class="stat-label">本月已结</div>
+                                <div class="stat-trend up">+8.9%</div>
+                            </div>
+                        </div>
+                        <div id="caseFlowChart" class="chart-container"></div>
+                    </div>
+                </div>
+
+                <!-- 失信被执行人分布 -->
+                <div class="card dishonest-distribution">
+                    <h3 class="card-title">
+                        <span class="title-icon"></span>
+                        失信被执行人分布
+                    </h3>
+                    <div class="card-content">
+                        <div id="dishonestMapChart" class="chart-container"></div>
+                        <div class="legend-info">
+                            <div class="legend-item">
+                                <span class="legend-dot high"></span>
+                                <span>高密度区域</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot medium"></span>
+                                <span>中密度区域</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot low"></span>
+                                <span>低密度区域</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 中间面板 -->
+            <section class="center-panel">
+                <!-- 核心指标展示 -->
+                <div class="core-metrics">
+                    <div class="metric-card">
+                        <div class="metric-icon execution-rate"></div>
+                        <div class="metric-info">
+                            <div class="metric-value">89.5<span class="unit">%</span></div>
+                            <div class="metric-label">执行到位率</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon target-amount"></div>
+                        <div class="metric-info">
+                            <div class="metric-value">156.8<span class="unit">亿</span></div>
+                            <div class="metric-label">执行标的总额</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon completion-rate"></div>
+                        <div class="metric-info">
+                            <div class="metric-value">92.3<span class="unit">%</span></div>
+                            <div class="metric-label">结案率</div>
+                        </div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-icon average-time"></div>
+                        <div class="metric-info">
+                            <div class="metric-value">45.6<span class="unit">天</span></div>
+                            <div class="metric-label">平均执行用时</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 执行工作态势 -->
+                <div class="card work-trend">
+                    <h3 class="card-title">
+                        <span class="title-icon"></span>
+                        执行工作态势
+                    </h3>
+                    <div class="card-content">
+                        <div id="workTrendChart" class="chart-container"></div>
+                    </div>
+                </div>
+
+                <!-- 执行质效指标达标情况 -->
+                <div class="card quality-indicators">
+                    <h3 class="card-title">
+                        <span class="title-icon"></span>
+                        执行质效指标达标情况
+                    </h3>
+                    <div class="card-content">
+                        <div id="qualityRadarChart" class="chart-container"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 右侧面板 -->
+            <section class="right-panel">
+                <!-- 案款情况分析 -->
+                <div class="card fund-analysis">
+                    <h3 class="card-title">
+                        <span class="title-icon"></span>
+                        案款情况分析
+                    </h3>
+                    <div class="card-content">
+                        <div class="fund-stats">
+                            <div class="fund-item">
+                                <div class="fund-icon deposit"></div>
+                                <div class="fund-info">
+                                    <div class="fund-label">提存案款</div>
+                                    <div class="fund-value">23.5<span class="unit">亿</span></div>
+                                </div>
+                            </div>
+                            <div class="fund-item">
+                                <div class="fund-icon unpaid"></div>
+                                <div class="fund-info">
+                                    <div class="fund-label">未发还案款</div>
+                                    <div class="fund-value">8.7<span class="unit">亿</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="fundFlowChart" class="chart-container"></div>
+                    </div>
+                </div>
+
+                <!-- 执行标的到位率趋势 -->
+                <div class="card target-achievement">
+                    <h3 class="card-title">
+                        <span class="title-icon"></span>
+                        执行标的到位率趋势
+                    </h3>
+                    <div class="card-content">
+                        <div id="targetTrendChart" class="chart-container"></div>
+                    </div>
+                </div>
+
+                <!-- 执行难点定位 -->
+                <div class="card difficulty-location">
+                    <h3 class="card-title">
+                        <span class="title-icon"></span>
+                        执行难点定位
+                    </h3>
+                    <div class="card-content">
+                        <div class="difficulty-list">
+                            <div class="difficulty-item high-priority">
+                                <span class="difficulty-rank">1</span>
+                                <span class="difficulty-desc">被执行人下落不明</span>
+                                <span class="difficulty-count">356</span>
+                            </div>
+                            <div class="difficulty-item high-priority">
+                                <span class="difficulty-rank">2</span>
+                                <span class="difficulty-desc">无可供执行财产</span>
+                                <span class="difficulty-count">298</span>
+                            </div>
+                            <div class="difficulty-item medium-priority">
+                                <span class="difficulty-rank">3</span>
+                                <span class="difficulty-desc">财产难以处置</span>
+                                <span class="difficulty-count">187</span>
+                            </div>
+                            <div class="difficulty-item medium-priority">
+                                <span class="difficulty-rank">4</span>
+                                <span class="difficulty-desc">案外人异议</span>
+                                <span class="difficulty-count">145</span>
+                            </div>
+                            <div class="difficulty-item low-priority">
+                                <span class="difficulty-rank">5</span>
+                                <span class="difficulty-desc">协助执行难</span>
+                                <span class="difficulty-count">89</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
